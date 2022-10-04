@@ -8,7 +8,7 @@ function App() {
   const [id, setId] = useState(0);
   const [todos, setTodos] = useState([]);
   const [todoInput, setTodoInput] = useState("");
-  const [enter, setEnter] = useEnterKey();
+  const [enter, setEnter] = useEnterKey({ test: 123 });
 
   function addTodo() {
     const newTodo = { id, task: todoInput, isCompleted: false };

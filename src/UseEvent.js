@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 
-function UseEvent() {
+function UseEvent(props) {
+  console.log(props);
+
   const [enterPressed, setEnterPressed] = useState(false);
 
   function handleKeyDown(e) {
