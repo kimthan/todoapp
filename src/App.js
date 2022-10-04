@@ -12,7 +12,7 @@ function App() {
 
   function addTodo() {
     const newTodo = { id, task: todoInput, isCompleted: false };
-    console.log(newTodo);
+
     setId(id + 1);
     setTodos((prev) => [...prev, newTodo]);
     setTodoInput("");
