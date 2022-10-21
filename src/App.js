@@ -1,27 +1,60 @@
-import React, { useState } from "react";
-import AddButton from "./AddButton";
+import React, { useEffect, useState, useRef } from "react";
+
+import { db } from "./firebase-config";
+import {
+  collection,
+  query,
+  onSnapshot,
+  doc,
+  updateDoc,
+  deleteDoc,
+  addDoc,
+} from "firebase/firestore";
 import AppTitle from "./AppTitle";
-import Input from "./Input";
-import TodoList from "./TodoList";
-import useEnterKey from "./UseEvent";
+import Button from "./Button";
 function App() {
-  const [id, setId] = useState(0);
-  const [todos, setTodos] = useState([]);
-  const [todoInput, setTodoInput] = useState("");
-  const [enter, setEnter] = useEnterKey({ test: 123 });
+  const [todo, setTodo] = useState("");
+  const [todolist, setTodolist] = useState([]);
+  const inputRef = useRef();
+  async function handleSubmit() {
+    console.log("TEST");
 
-  function addTodo() {
-    const newTodo = { id, task: todoInput, isCompleted: false };
+    if (!todo) return;
+    await addDoc(collection(db, "todo"), {
+      task: todo,
+      isCompleted: false,
+    });
+    setTodo("");
 
-    setId(id + 1);
-    setTodos((prev) => [...prev, newTodo]);
-    setTodoInput("");
+    inputRef.current.focus();
   }
-  if (enter && todoInput !== "") {
-    setEnter(false);
-    addTodo();
-  }
 
+  async function toggleCompleted(todo) {
+    await updateDoc(doc(db, "todo", todo.id), {
+      isCompleted: !todo.isCompleted,
+    });
+  }
+  async function handleDelete(todo) {
+    await deleteDoc(doc(db, "todo", todo.id));
+  }
+  useEffect(() => {
+    console.log("useeffect");
+    inputRef.current.focus();
+    const q = query(collection(db, "todo"));
+    const unsub = onSnapshot(q, (querySnapshot) => {
+      console.log(querySnapshot);
+
+      let todosArray = [];
+      querySnapshot.forEach((doc) => {
+        todosArray.push({ ...doc.data(), id: doc.id });
+      });
+
+      setTodolist(todosArray);
+    });
+    return () => {
+      unsub();
+    };
+  }, []);
   return (
     <div>
       <div
@@ -29,28 +62,42 @@ function App() {
 mt-4 p-2 min-h-[250px] relative flex flex-col justify-between
 "
       >
-        <AppTitle title={"Todo App!"} />
+        <AppTitle>Todo App!</AppTitle>
+        {todolist &&
+          todolist.map((todo) => {
+            return (
+              <div key={todo.id}>
+                <ul>
+                  <span
+                    className="cursor-pointer"
+                    onClick={() => handleDelete(todo)}
+                  >
+                    x{" "}
+                  </span>
+                  <span className={`${todo.isCompleted ? "line-through" : ""}`}>
+                    {todo.task} --
+                  </span>
+                  <span
+                    onClick={() => toggleCompleted(todo)}
+                    className={`${
+                      todo.isCompleted ? "bg-green-200" : "bg-red-200"
+                    }`}
+                  >
+                    {todo.isCompleted ? "Done" : "Not Done"}
+                  </span>
+                </ul>
+              </div>
+            );
+          })}
         <div>
-          <TodoList
-            todos={todos}
-            setTodos={setTodos}
-            todoInput={todoInput}
-            setTodoInput={setTodoInput}
-            enter={enter}
+          <input
+            className="bg-red-200 mr-2"
+            value={todo}
+            ref={inputRef}
+            onChange={(e) => setTodo(e.target.value)}
           />
+          <Button {...{ handleSubmit }}>adddd</Button>
         </div>
-        <Input todoInput={todoInput} setTodoInput={setTodoInput} />
-        <AddButton
-          hasText={todoInput}
-          id={id}
-          setId={setId}
-          todoInput={todoInput}
-          setTodoInput={setTodoInput}
-          setTodos={setTodos}
-          enter={enter}
-          setEnter={setEnter}
-          addTodo={addTodo}
-        />
       </div>
     </div>
   );

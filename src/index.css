@@ -2,12 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-body{
-    background-color: rgb(237, 235, 235);
+body {
+  background-color: rgb(237, 235, 235);
 }
 
-input[type="text"], textarea {
-
-    background-color : rgb(243, 243, 243); 
-  
-  }
+input[type="text"],
+textarea {
+  background-color: rgb(243, 243, 243);
+}
